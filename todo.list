@@ -1,0 +1,8 @@
+/config_info?pass 
+/config?pass&[params]
+/restart?pass
+/stop?pass
+/change_pass?oldpass&newpass
+/help?pass
+
+testing:

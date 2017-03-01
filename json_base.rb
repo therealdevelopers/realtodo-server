@@ -1,4 +1,4 @@
-require "json"
+require "oj"
 
 class JsonBase
 	attr_reader :path, :max_pushes
@@ -23,21 +23,21 @@ class JsonBase
 	
 	def init_hash(path)
 		if !File.exists?(@path) then 
-			File.open(@path, "w") {|file| file.write default_base_scheme_hash.to_json}
+			File.open(@path, "w") {|file| file.write Oj.dump default_base_scheme_hash}
 			puts "json_base\t: init_hash\t: Creating new db file" 
 		end
 		puts "[INFO] json_base\t: init_hash\t: Start"
 		puts "[INFO] json_base\t: init_hash\t: Reading data in #{@path}"
 		data = IO.read(@path)
 		puts "[INFO] json_base\t: init_hash\t: Data read: #{data}"
-		@hash = JSON.parse(data, symbolize_names: true)
+		@hash = Oj.load(data)
 		@hash.default = ""
 		puts "[INFO] json_base\t: init_hash\t: Data parsed : #{@hash.to_s}"
 	end
 	
 	def get_push(options = {})
 		passname = options[:passname]
-		index = options[:index]
+		index = get_index_by_alias options[:index]
 		#puts "json_base : get_push : Trying to pull #{index} push of #{passname}."
 		#puts "json_base : get_push : Press return to start!"
 		#gets
@@ -85,7 +85,7 @@ class JsonBase
 	def save
 		puts
 		puts "[INFO] json_base\t: save\t: DB saving..."
-		File.open(@path, "w") {|file| file.write @hash.to_json}
+		File.open(@path, "w") {|file| file.write Oj.dump @hash}
 	end
 
 	private
@@ -96,5 +96,9 @@ class JsonBase
 			:users => Array.new,
 			:user_data => Hash.new
 		}
+	end
+	
+	def get_index_by_alias index
+		return index if index.is_a? Numeric && index
 	end
 end
